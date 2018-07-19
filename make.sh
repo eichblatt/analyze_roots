@@ -1,0 +1,1 @@
+pdflatex raporto.tex
