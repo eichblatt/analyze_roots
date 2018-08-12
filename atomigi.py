@@ -5,7 +5,7 @@ import pandas as pd
 #reload(sys)  
 #sys.setdefaultencoding('utf-8')
 
-rootfile="/home/steve/esperanto/analyze_roots/roots.txt" 
+rootfile="C:/Users/steve/Esperanto/analyze_roots/roots.txt" 
 #rootfile="/home/seichblatt/python/roots.txt" 
 hatdict={'au':'aŭ','eu':'eŭ','ou':'oŭ','cx':'ĉ','ch':'ĉ','gx':'ĝ','gh':'ĝ','hx':'ĥ','hh':'ĥ','jx':'ĵ','jh':'ĵ','sx':'ŝ','sh':'ŝ'}
 atomvortoj=['adiaŭ','almenaŭ','ambaŭ','ankaŭ','ankoraŭ','anstataŭ','antaŭ','apenaŭ','aŭ','baldaŭ','hieraŭ','hodiaŭ','kontraŭ','kvazaŭ','malgraŭ','preskaŭ','ĉirkaŭ','apud','ekster','preter','tamen','kvankam','ili','oni','unu']
@@ -33,10 +33,10 @@ def addhats(x):
     return x
 
 def readroots(rootfile):
-    with open(rootfile,"r") as f:
+    with open(rootfile,"r",encoding='utf-8') as f:
       allroots=f.read().splitlines()
     f.close()
-    allroots=[string.lower(addhats(x)) for x in allroots]
+    allroots=[addhats(x).lower() for x in allroots]
     allroots.sort()
     allroots=[key for key,_ in itertools.groupby(allroots)]
     return allroots
@@ -57,7 +57,7 @@ class vorto:
   def __init__(mem,vorto):
     mem.sufs=[]; mem.prefs=[]; mem.radik=''; mem.fins=[]; mem.valid=False
     mem._vorto=vorto
-    mem.vorto=addhats(string.lower(vorto))
+    mem.vorto=addhats(str.lower(vorto))
     mem.ebloj=pd.DataFrame()
     mem.disigi()
     
@@ -116,9 +116,11 @@ class vorto:
        prob=ebl['prob']
        if not ebl['valid']:prob=prob*math.pow(len(vorto.chiuradik),-1*vowelcount(ebl['radik']))
        for j in ebl.sufs:
-          prob=prob*(.8/len(ksufs))/math.pow(2,(suf_dict[j.encode('utf8')]-1))
+          #prob=prob*(.8/len(ksufs))/math.pow(2,(suf_dict[j.encode('utf8')]-1))
+          prob=prob*(.8/len(ksufs))/math.pow(2,(suf_dict[j]-1))
        for j in ebl.prefs:
-          prob=prob*(.3/len(kprefs))/math.pow(2,(pref_dict[j.encode('utf8')]-1))
+          #prob=prob*(.3/len(kprefs))/math.pow(2,(pref_dict[j.encode('utf8')]-1))
+          prob=prob*(.3/len(kprefs))/math.pow(2,(pref_dict[j]-1))
        prob_list.append(prob) 
     mem.ebloj['prob']=prob_list
     return

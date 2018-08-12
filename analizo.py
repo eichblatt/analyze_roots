@@ -10,11 +10,16 @@ from collections import OrderedDict
 from matplotlib import pyplot as plt
 from sklearn.cluster.bicluster import SpectralBiclustering
 
-pd.options.display.max_columns=30
-pd.set_option('display.width', pd.util.terminal.get_terminal_size()[0])
+#pd.options.display.max_columns=30
+#pd.set_option('display.width', pd.util.terminal.get_terminal_size()[0])
 
-reload(sys)  
-sys.setdefaultencoding('utf-8')
+pd.set_option('display.height', 30)
+pd.set_option('display.max_rows', 30)
+pd.set_option('display.max_columns', 30)
+pd.set_option('display.width', 1000)
+
+#reload(sys)  
+#sys.setdefaultencoding('utf-8')
 
 def get_modstring_rack(wcdf):
   www=wcdf[['root','root_freq','modstring']] 
@@ -79,7 +84,7 @@ def get_sim_matrix(wcdf,corr=None,thresh=0.5):
       others=others[np.where(others>r)] 
     else:
       others=roots[np.where(roots>r)]
-    print "working on",r,"with",len(others),"others."
+    print("working on",r,"with",len(others),"others.")
     sim=pd.DataFrame([(r,o,roots_similarity(wcdf,r,o)) for o in others],columns=['root1','root2','sim_diff'])
     simdf=pd.concat([simdf,sim])
   simdf['similarity']=simdf['sim_diff'].apply(lambda x:x[0]-x[1])
@@ -118,7 +123,8 @@ def describe_all(pstack,prack,wcdf,depth=5,n_examples=5,n_digits=4):
   g=g.sort_values(by='N',ascending=False)
   colwidth=pd.get_option('max_colwidth')
   pd.set_option('max_colwidth',200)
-  print g
+  print(g)
+
   pd.set_option('max_colwidth',colwidth)
   return g
 
@@ -127,7 +133,7 @@ def describe_group(wcdf,groupnum):
   pmeans=ppp.reset_index().fillna(0.0).groupby('groupnum').mean()
   pstack=pd.DataFrame(pmeans.unstack()).reset_index().pivot(index='modstring',columns='groupnum')[0].sort_values(by=groupnum,ascending=False)
   pstack=pstack.replace({0.00:None})
-  print pstack
+  print(pstack)
   return pstack
 
 def atomwords(wcdf,neniu_thresh=0.3):
@@ -144,9 +150,9 @@ def examine_group(wcdf,groupnum,topn=5,min_freq=0.05,means_only=False):
   part=wcdf.loc[np.in1d(wcdf.root,groups[groupnum][:topn])].sort_values(['root','root_freq'],ascending=False)[['root','word','mods','modstring','groupnum','root_count','root_freq']].loc[wcdf.root_freq>min_freq]
   #print part
   p=part.pivot(index='root',columns='modstring',values='root_freq')
-  if not means_only: print p
+  if not means_only: print(p)
   pmeans=p.fillna(0.).mean().sort_values(ascending=False)
-  print pmeans.loc[pmeans>min_freq]
+  print(pmeans.loc[pmeans>min_freq])
   return part
 
 def cluster_example(wcdf,prack):
@@ -155,7 +161,7 @@ def cluster_example(wcdf,prack):
   clust_example=spectral_cluster(newdata,(4,4))
   newdata['groupnum']=clust_example.row_labels_
   wc_example=pd.merge(wcdf,newdata.reset_index()[['root','groupnum']],on='root',how='left')
-  print {n:group_roots(wc_example,n) for n in range(4)}
+  print ({n:group_roots(wc_example,n) for n in range(4)})
   return newdata
 
 def get_wcdict(wcdf):
@@ -165,6 +171,14 @@ def get_wcdict(wcdf):
   wcd['atom']=wcdf.loc[(wcdf.atomvorto==True)&(wcdf.root_count>100)]
   return wcd
 
+def get_sim(wcd):
+  try:
+    sim=pd.read_pickle(os.path.join(args.basepath,'sim_matrix.pkl'))
+  except:
+    print('failed to load similarity matrix')
+    sim={k:build_sim_matrix(wcd[k],np.unique(wcd[k].groupnum)) for k in wcd.keys()}
+  return sim
+  
 def analyze(wcd,rackd,k):
   prack=pivot_rack(rackd[k])
   clusters=spectral_cluster(prack,(args.n_groups,args.n_modgroups))
@@ -176,46 +190,11 @@ def analyze(wcd,rackd,k):
   groups={n:group_roots(wcdf,n) for n in range(args.n_groups)}
   pstack=describe_group(wcdf,0)
   description=describe_all(pstack,prack,wcdf,n_digits=2)
- 
-def main(args):
-  for k in sorted(args.__dict__.keys()): print '{0:20} : {1}'.format(k,args.__dict__[k])
-  pstackd={}; description={}
-  wcdfpath=os.path.join(args.basepath,args.wordcount_name)
-  wcdf0=wordcounts.get_wcdf(wcdfpath,args)
-  rootlist=list(OrderedDict.fromkeys(wcdf0[wcdf0.valid].sort_values(by='root_count',ascending=False)['root'].values))[:args.topn]
-  wcdf=wcdf0[wcdf0['root'].isin(rootlist)]
-  wcd=get_wcdict(wcdf)
-
-  rackd={k:get_modstring_rack(wcd[k]) for k in wcd.keys()}
-  prackd={k:pivot_rack(rackd[k]) for k in rackd.keys()}
-  clusters={k:spectral_cluster(prackd[k],(args.n_groups,args.n_modgroups)) for k in prackd.keys()}
-
-  for k in clusters.keys(): 
-    prackd[k]['groupnum']=clusters[k].row_labels_
-    wcd[k]=wcd[k].reset_index()
-    wcd[k]=pd.merge(wcd[k],prackd[k].reset_index()[['root','groupnum']],on='root',how='left')
-
-    groups={n:group_roots(wcd[k],n) for n in range(args.n_groups)}
-    pstackd[k]=describe_group(wcd[k],0)
-    description[k]=describe_all(pstackd[k],prackd[k],wcd[k],n_digits=2)
-
-  sim={k:build_sim_matrix(wcd[k],np.unique(wcd[k].groupnum)) for k in wcd.keys()}
-
-  #(pcorr,bcorr)=get_corr(prack)
-  #sim_matrix=get_sim_matrix(wcdf,bcorr)
-
-  sim=pickle.load(open(os.path.join(args.basepath,'sim_matrix.pkl'),'rb'))
-  sim=pd.merge(sim,wcdf.groupby('root')[['Nwords','atomvorto']].agg('first'),how='left',right_index=True,left_on='root1')
-  sim=pd.merge(sim,wcdf.groupby('root')[['Nwords','atomvorto']].agg('first'),how='left',right_index=True,left_on='root2')
-  most_similar=sim.loc[(sim.atomvorto_x==False)&(sim.atomvorto_y==False)&(sim.Nwords_x>9)&(sim.Nwords_y>9)]
-
-  most_similar=most_similar.loc[most_similar.similarity>.8]
-  return(wcdf,rackd,pstack,prackd)
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("-basepath", dest='basepath', default='/home/steve/esperanto/analyze_roots',help="top folder of corpus")
-    argparser.add_argument("-textpath", dest='textpath', default='/home/steve/esperanto/tekstaro_de_esperanto_2017-07-25',help="top folder of corpus")
+    argparser.add_argument("-basepath", dest='basepath', default=os.path.join(os.getenv('HOME','C:/Users/steve'),'esperanto/analyze_roots'),help="top folder of corpus")
+    argparser.add_argument("-textpath", dest='textpath', default=os.path.join(os.getenv('HOME','C:/Users/steve'),'esperanto/tekstaro_de_esperanto_2017-07-25'),help="top folder of corpus")
     argparser.add_argument("-wordcount_name", dest='wordcount_name', default='word_counts.pkl',help="word count dataframe path")
     argparser.add_argument("-force", dest='force', default=False,type=bool,help="create word count dataframe, even if it already exists")
     argparser.add_argument("-min_count", dest='min_count', default=3,type=int,help="minimum number of appearances for a word to count")
@@ -225,5 +204,32 @@ if __name__ == '__main__':
     argparser.add_argument("-n_modgroups", dest='n_modgroups', default=50,type=int,help="number of modstring clusters")
 
     args = argparser.parse_args()
-    import pdb; pdb.set_trace()
-    (pcorr,bcorr,wcdf,rack)=main(args)
+    #import pdb; pdb.set_trace()
+    for k in sorted(args.__dict__.keys()): print ('{0:20} : {1}'.format(k,args.__dict__[k]))
+    pstackd={}; description={}
+    wcdfpath=os.path.join(args.basepath,'word_counts.pkl')
+    wcdf0=wordcounts.get_wcdf(wcdfpath,args)
+    rootlist=list(OrderedDict.fromkeys(wcdf0[wcdf0.valid].sort_values(by='root_count',ascending=False)['root'].values))[:args.topn]
+    wcdf=wcdf0[wcdf0['root'].isin(rootlist)]
+    wcd=get_wcdict(wcdf)  
+  
+    rackd={k:get_modstring_rack(wcd[k]) for k in wcd.keys()}
+    prackd={k:pivot_rack(rackd[k]) for k in rackd.keys()}
+    clusters={k:spectral_cluster(prackd[k],(args.n_groups,args.n_modgroups)) for k in prackd.keys()}
+    
+    for k in clusters.keys(): 
+      prackd[k]['groupnum']=clusters[k].row_labels_
+      wcd[k]=wcd[k].reset_index()
+      wcd[k]=pd.merge(wcd[k],prackd[k].reset_index()[['root','groupnum']],on='root',how='left')
+    
+      groups={n:group_roots(wcd[k],n) for n in range(args.n_groups)}
+      pstackd[k]=describe_group(wcd[k],0)
+      description[k]=describe_all(pstackd[k],prackd[k],wcd[k],n_digits=2)
+    
+    sim=get_sim(wcd)
+    sim=pd.merge(sim,wcdf.groupby('root')[['Nwords','atomvorto']].agg('first'),how='left',right_index=True,left_on='root1')
+    sim=pd.merge(sim,wcdf.groupby('root')[['Nwords','atomvorto']].agg('first'),how='left',right_index=True,left_on='root2')
+    most_similar=sim.loc[(sim.atomvorto_x==False)&(sim.atomvorto_y==False)&(sim.Nwords_x>9)&(sim.Nwords_y>9)]
+    
+    most_similar=most_similar.loc[most_similar.similarity>.8]
+  
