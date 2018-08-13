@@ -5,8 +5,8 @@ import pandas as pd
 #reload(sys)  
 #sys.setdefaultencoding('utf-8')
 
-rootfile="C:/Users/steve/Esperanto/analyze_roots/roots.txt" 
-#rootfile="/home/seichblatt/python/roots.txt" 
+#rootfile="C:/Users/steve/Esperanto/analyze_roots/roots.txt" 
+rootfile="/home/steve/esperanto/analyze_roots/roots.txt" 
 hatdict={'au':'aŭ','eu':'eŭ','ou':'oŭ','cx':'ĉ','ch':'ĉ','gx':'ĝ','gh':'ĝ','hx':'ĥ','hh':'ĥ','jx':'ĵ','jh':'ĵ','sx':'ŝ','sh':'ŝ'}
 atomvortoj=['adiaŭ','almenaŭ','ambaŭ','ankaŭ','ankoraŭ','anstataŭ','antaŭ','apenaŭ','aŭ','baldaŭ','hieraŭ','hodiaŭ','kontraŭ','kvazaŭ','malgraŭ','preskaŭ','ĉirkaŭ','apud','ekster','preter','tamen','kvankam','ili','oni','unu']
 
@@ -34,6 +34,7 @@ def addhats(x):
 
 def readroots(rootfile):
     with open(rootfile,"r",encoding='utf-8') as f:
+#    with open(rootfile,"r") as f:
       allroots=f.read().splitlines()
     f.close()
     allroots=[addhats(x).lower() for x in allroots]

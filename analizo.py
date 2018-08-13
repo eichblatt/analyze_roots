@@ -13,10 +13,10 @@ from sklearn.cluster.bicluster import SpectralBiclustering
 #pd.options.display.max_columns=30
 #pd.set_option('display.width', pd.util.terminal.get_terminal_size()[0])
 
-pd.set_option('display.height', 30)
-pd.set_option('display.max_rows', 30)
-pd.set_option('display.max_columns', 30)
-pd.set_option('display.width', 1000)
+#pd.set_option('display.height', 30)
+#pd.set_option('display.max_rows', 30)
+#pd.set_option('display.max_columns', 30)
+#pd.set_option('display.width', 1000)
 
 #reload(sys)  
 #sys.setdefaultencoding('utf-8')
