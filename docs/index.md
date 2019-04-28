@@ -1,4 +1,4 @@
-# [Analyze roots] (https://github.com/eichblatt/analyze_roots)
+# [Analyze roots](https://github.com/eichblatt/analyze_roots)
 
 ## Introduction 
 
