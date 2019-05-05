@@ -9,5 +9,6 @@ This project contains python code which I developed to analyze the similarity of
 To read the report in [English](report.pdf) or [Esperanto](https:raporto.pdf)
 
 # Reference
-[The github repo](https://github.com/eichblatt/analyze_roots)
+[My Homepage](https://eichblatt.github.io)
+[The github repo](https://eichblatt.githut.io/analyze_roots)
 [This page: https://eichblatt.github.io/analyze_roots/](https://eichblatt.github.io/analyze_roots/)
