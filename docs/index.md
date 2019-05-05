@@ -10,5 +10,7 @@ To read the report in [English](report.pdf) or [Esperanto](https:raporto.pdf)
 
 # Reference
 [My Homepage](https://eichblatt.github.io)
+
 [The github repo](https://eichblatt.githut.io/analyze_roots)
+
 [This page: https://eichblatt.github.io/analyze_roots/](https://eichblatt.github.io/analyze_roots/)
