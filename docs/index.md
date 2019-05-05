@@ -6,7 +6,7 @@ This project contains python code which I developed to analyze the similarity of
 
 ## Documents
 
-To read the report in [English](https://github.com/eichblatt/analyze_roots/blob/master/docs/report.pdf) or [Esperanto](https://github.com/eichblatt/analyze_roots/blob/master/docs/raporto.pdf)
+To read the report in [English](docs/report.pdf) or [Esperanto](https:/docs/raporto.pdf)
 
 # Reference
 [The github repo](https://github.com/eichblatt/analyze_roots)
